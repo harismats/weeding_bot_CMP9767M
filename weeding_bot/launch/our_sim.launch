@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+
+<launch>
+
+
+  <!-- ARGS -->
+
+  <arg name="robot_name" default="thorvald_001"/>
+  <arg name="tf_prefix" default="$(arg robot_name)/"/>
+  <arg name="cmd_vel_topic" default="$(arg robot_name)nav_vel" />
+  <arg name="odom_topic" default="$(arg tf_prefix)odometry/base_raw" />
+
+  <arg name="scan" default="$(arg tf_prefix)scan"/>
+
+  <arg name="obstacles" default="true"/>
+  <arg name="second_robot" default="false"/>
+  <arg name="fake_localisation" default="false"/>
+
+  <arg name="base_frame" default="$(arg tf_prefix)base_link"/>
+  <arg name="odom_frame" default="$(arg tf_prefix)odom"/>
+  <arg name="map_frame" default="map"/>
+
+  <!-- ####################################################### -->
+
+  <!-- launch our simulation with our robot inside -->
+  <include file="$(find uol_cmp9767m_base)/launch/thorvald-sim.launch">
+    <arg name="obstacles" value="$(arg obstacles)" />
+    <arg name="second_robot" value="$(arg second_robot)" />
+    <arg name="fake_localisation" value="$(arg fake_localisation)" />
+  </include>
+
+
+  <!-- launch the move_base package for our robot 
+  <include file="$(find weeding_bot)/launch/our_move_base.launch">
+    <arg name="robot_name" value="$(arg robot_name)" />
+    <arg name="cmd_vel_topic" value="$(arg cmd_vel_topic)" />
+    <arg name="odom_topic" value="$(arg odom_topic)" />
+  </include> -->
+
+
+  <!-- launch Gmapping for our robot -->
+  <include file="$(find weeding_bot)/launch/gmapping.launch">
+    <arg name="base_frame" value="$(arg base_frame)" />
+    <arg name="odom_frame" value="$(arg odom_frame)" />
+    <arg name="map_frame" value="$(arg map_frame)" />
+    <arg name="scan" value="$(arg scan)" />
+  </include> 
+
+
+  <!-- launch rviz with our file -->
+  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find weeding_bot)/rviz/thorvald.rviz" />
+
+
+</launch>
