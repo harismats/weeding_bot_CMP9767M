@@ -7,7 +7,7 @@
 
   <arg name="robot_name" default="thorvald_001"/>
   <arg name="tf_prefix" default="$(arg robot_name)/"/>
-  <arg name="cmd_vel_topic" default="$(arg robot_name)nav_vel" />
+  <arg name="cmd_vel_topic" default="$(arg tf_prefix)nav_vel" />
   <arg name="odom_topic" default="$(arg tf_prefix)odometry/base_raw" />
 
   <arg name="scan" default="$(arg tf_prefix)scan"/>
@@ -30,12 +30,12 @@
   </include>
 
 
-  <!-- launch the move_base package for our robot 
+  <!-- launch the move_base package for our robot -->
   <include file="$(find weeding_bot)/launch/our_move_base.launch">
     <arg name="robot_name" value="$(arg robot_name)" />
     <arg name="cmd_vel_topic" value="$(arg cmd_vel_topic)" />
     <arg name="odom_topic" value="$(arg odom_topic)" />
-  </include> -->
+  </include> 
 
 
   <!-- launch Gmapping for our robot -->
@@ -45,6 +45,12 @@
     <arg name="map_frame" value="$(arg map_frame)" />
     <arg name="scan" value="$(arg scan)" />
   </include> 
+
+
+  <!-- launch all our additional nodes 
+  <include file="$(find weeding_bot)/launch/system_nodes.launch">
+    <arg name="robot_name" value="$(arg robot_name)" />
+  </include> -->
 
 
   <!-- launch rviz with our file -->
