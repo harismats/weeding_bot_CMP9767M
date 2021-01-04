@@ -21,7 +21,7 @@ class Sprayer:
     
     #initialise subscribers and publishers
     self.nozzle_spray_srv = rospy.ServiceProxy("{}/spray_service".format(self.robot_name), nozzle_move_to_spray)
-    self.weed_cloud_sub = rospy.Subscriber("{}/weed_pointcloud".format(self.robot_name), PointCloud, self.sprayWeeds)
+    self.weed_cloud_sub = rospy.Subscriber("{}/weed_points".format(self.robot_name), PointCloud, self.sprayWeeds)
 
     #to lookup sprayer pose in map frame
     self.listener = tf.listener.TransformListener()
@@ -88,4 +88,4 @@ def main(args):
     
         
 if __name__ == '__main__':
-    main(sys.argv)
+  main(sys.argv)
