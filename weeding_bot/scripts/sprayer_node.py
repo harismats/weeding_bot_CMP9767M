@@ -31,10 +31,11 @@ class Sprayer:
   def sprayWeeds(self, weed_pointcloud_msg):
 
     #get pose of srayer in map frame first
-    spr_trans, failed_tf_lookup = getSprayerPoseInMap(weed_pointcloud_msg.header.stamp)
+    spr_trans, failed_tf_lookup = self.getSprayerPoseInMap(weed_pointcloud_msg.header.stamp)
 
     #if we got the sprayer pose as we should we continue
     if(failed_tf_lookup!=1):
+      print("ready to spray")
       #for all detected weed places
       for weed in weed_pointcloud_msg.points:
         #get difference in x and y axis etween sprayer and weed
@@ -44,7 +45,7 @@ class Sprayer:
         #if the detected weed in inside the crop area (lane width-wise)
         if abs(dy) < 0.6:
           #if we are not far in terms of x axis - just so we don't miss
-          if dx < 0.1:
+          if dx < 0.05:
             #if we haven't sprayed at this weed yet
             if weed not in self.sprayed:
               #add it to the stack of sprayed weeds
@@ -53,6 +54,7 @@ class Sprayer:
               #call service to spray it
               req = nozzle_move_to_sprayRequest()
               req.y_axis_motion = dy
+              print('spraying at dy= {}'.format(dy))
               self.nozzle_spray_srv(req)
 
 

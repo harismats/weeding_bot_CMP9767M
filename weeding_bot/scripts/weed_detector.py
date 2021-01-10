@@ -10,6 +10,8 @@ import cv2
 from cv_bridge import CvBridge
 import image_geometry
 
+from geometry_msgs.msg import Point32
+
 #from pylab import *
 
 from sensor_msgs.msg import Image, CameraInfo, PointCloud
@@ -137,9 +139,18 @@ class WeedDetector:
     # lower_bound = np.array([0, 30, 30])
     # upper_bound = np.array([20, 140, 80])
 
-    #everything that is not ground
-    lower_bound = np.array([30, 0, 10])
-    upper_bound = np.array([90, 255, 150])
+    #everything that is not ground. anything that is plant (both lettuces, onions and weeds)
+    # lower_bound = np.array([30, 0, 10])
+    # upper_bound = np.array([90, 255, 150])
+
+    #good results for lettuce1 and lettuce2 weeds
+    lower_bound = np.array([30, 30, 0])
+    upper_bound = np.array([100, 90, 85])
+
+    #decent results for onion weeds
+    # lower_bound = np.array([40, 90, 0])
+    # upper_bound = np.array([100, 100, 200])
+
 
     return lower_bound, upper_bound
 
@@ -157,11 +168,11 @@ class WeedDetector:
     area_thresh = 350
     contours_filtered = []
     #do the filtering for each contour we found
-    for cnt in contours:
-      cont_area = cv2.contourArea(cnt)
+    for contour in contours:
+      cont_area = cv2.contourArea(contour)
       #if the current contour has a bigger area than the threshold, keep it
       if cont_area >= area_thresh:
-        contours_filtered.append(cnt)
+        contours_filtered.append(contour)
 
 
     #draw the filtered contours we found
@@ -179,27 +190,40 @@ class WeedDetector:
   def compute_rectangs(self, contours_filtered, image):
 
     detected_rectangs = []
+    rect_centers = []
 
     #from filtered contours detect rectangulars
-    for cnt in contours_filtered:
-      x, y, w, h = cv2.boundingRect(cnt)
+    for contour in contours_filtered:
+      x, y, w, h = cv2.boundingRect(contour)
       cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
       detected_rectangs.append([x, y, w, h])
-
-    #combine rectangles with similar sizes and similar locations
-    rectList, weights = cv2.groupRectangles(detected_rectangs, groupThreshold=1, eps=0.05)
-
-    #compute and draw circles
-    rect_centers = []
-    for rectangle in rectList:
       center_x = x + w/2
       center_y = y + h/2
       center_point = (center_x, center_y)
       rect_centers.append(center_point)
-      cv2.circle(image, center_point, 5, (0, 255, 0), 2)
+
+    # print('Num of detected rectangles: {}'.format(len(detected_rectangs)))
+
+    # #combine rectangles with similar sizes and similar locations
+    # rectList = cv2.groupRectangles(detected_rectangs, groupThreshold=1, eps=0.1)
+
+    # print(rectList[0])
+    # print(rectList[1])    
+
+    # print('Num of rects: {}'.format(len(rectList)))
+
+    # #compute and draw circles
+    # rect_centers = []
+    # for rectangle in rectList:
+    #   center_x = x + w/2
+    #   center_y = y + h/2
+    #   center_point = (center_x, center_y)
+    #   rect_centers.append(center_point)
+    #   cv2.circle(image, center_point, 10, (255, 0, 0), 2)
 
 
-    return image, rectList, rect_centers
+    #if groupRectangles, i should return rectList instead of detected_rectangs
+    return image, detected_rectangs, rect_centers
 
 
   #publish pointcloud of weed positions
@@ -212,15 +236,12 @@ class WeedDetector:
 
     #rectify and project points in pointcloud based on camera model
     for w_center in rect_centers:
-
       #rectify and project in pixel coordinates
       rectified_point = self.camera_model.rectifyPoint(w_center)
       projected_point = self.camera_model.projectPixelTo3dRay(rectified_point)
 
-      self.points_msg.points.append(Point32(projected_point[0]*0.493, projected_point[1]*0.493, 0.493))
+      self.weed_pointcloud_msg.points.append(Point32(projected_point[0]*0.493, projected_point[1]*0.493, 0.493))
 
-
-    print('Num of points identified: {}'.format(len(self.weed_pointcloud_msg.points)))
 
     #transform pointcloud to global map frame
     weed_pointcloud_in_map_msg = self.tflistener.transformPointCloud('map', self.weed_pointcloud_msg)
@@ -228,6 +249,7 @@ class WeedDetector:
     #publish pointcloud
     self.weed_cloud_pub.publish(weed_pointcloud_in_map_msg)
 
+    print('Num of points published: {}'.format(len(weed_pointcloud_in_map_msg.points)))
 
 
   #show image data
@@ -250,7 +272,7 @@ class WeedDetector:
 
 def main(args):
   #initialize node
-  rospy.init_node('sprayer_node', anonymous=True)
+  rospy.init_node('weed_detector_node', anonymous=True)
 
   #get arguments and instantiate object of class
   robot_name = sys.argv[1].decode('string-escape')
