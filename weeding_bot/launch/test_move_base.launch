@@ -1,17 +1,13 @@
+<?xml version="1.0"?>
+
 <launch>
 
-  <!-- ARGS 
 
-  <arg name="robot_name" />
-  <arg name="cmd_vel_topic" />
-  <arg name="odom_topic" />-->
-  <arg name="move_forward_only" default="false" />
-
-
+  <!-- ARGS -->
 
   <arg name="robot_name" default="thorvald_001"/>
   <arg name="tf_prefix" default="$(arg robot_name)/"/>
-  <arg name="cmd_vel_topic" default="$(arg robot_name)nav_vel" />
+  <arg name="cmd_vel_topic" default="$(arg tf_prefix)nav_vel" />
   <arg name="odom_topic" default="$(arg tf_prefix)odometry/base_raw" />
 
   <arg name="scan" default="$(arg tf_prefix)scan"/>
@@ -27,63 +23,25 @@
   <!-- ####################################################### -->
 
 
-    <!-- move_base -->
-    <node name="move_base" pkg="move_base" type="move_base" output="screen">
-      <remap from="odom" to="thorvald_001/odometry/base_raw" />
-      <remap from="cmd_vel" to="thorvald_001/nav_vel" />
+  <!-- launch the move_base package for our robot -->
+  <include file="$(find weeding_bot)/launch/our_move_base.launch">
+    <arg name="robot_name" value="$(arg robot_name)" />
+    <arg name="cmd_vel_topic" value="$(arg cmd_vel_topic)" />
+    <arg name="odom_topic" value="$(arg odom_topic)" />
+  </include> 
 
-      <rosparam file="$(find uol_cmp9767m_tutorial)/config/costmap_common_params.yaml" command="load" ns="global_costmap"/>
-      <rosparam file="$(find uol_cmp9767m_tutorial)/config/costmap_common_params.yaml" command="load" ns="local_costmap"/>
+  <!-- <include file="$(find uol_cmp9767m_tutorial)/launch/move_base.launch"/> -->
 
-      <rosparam file="$(find uol_cmp9767m_tutorial)/config/global_costmap_params.yaml" command="load"/>
-      <rosparam file="$(find uol_cmp9767m_tutorial)/config/local_costmap_params.yaml" command="load"/>
 
-      <rosparam file="$(find uol_cmp9767m_tutorial)/config/planners_topo_nav_ours.yaml" command="load"/>
+  <arg name="map_file" default="$(find weeding_bot)maps/cropped.yaml"/>
 
-      <!--remap hokuyo frame and topic-->
-      <rosparam param="local_costmap/obstacle_layer/laser_scan_sensor/sensor_frame" subst_value="True">thorvald_001/hokuyo</rosparam>
-      <rosparam param="local_costmap/obstacle_layer/laser_scan_sensor/topic" subst_value="True">scan</rosparam>
-      <rosparam param="global_costmap/global_obstacle_layer/laser_scan_sensor/sensor_frame" subst_value="True">thorvald_001/hokuyo</rosparam>
-      <rosparam param="global_costmap/global_obstacle_layer/laser_scan_sensor/topic" subst_value="True">scan</rosparam>
+  <!-- map server -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)"/>
 
-    </node>
+  <!-- -->
+  <include file="$(find weeding_bot)/launch/amcl.launch"/>
+  
 
-    <!-- mine -->
 
-  <!-- move_base 
-  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-    <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
-
-    <rosparam file="$(find uol_cmp9767m_tutorial)/config/costmap_common_params.yaml" command="load" ns="global_costmap"/>
-    <rosparam file="$(find uol_cmp9767m_tutorial)/config/costmap_common_params.yaml" command="load" ns="local_costmap"/>
-
-    <rosparam file="$(find uol_cmp9767m_tutorial)/config/global_costmap_params.yaml" command="load"/>
-    <rosparam file="$(find uol_cmp9767m_tutorial)/config/local_costmap_params.yaml" command="load"/>-->
-    
-    <!-- <rosparam file="$(find uol_cmp9767m_tutorial)/config/planners.yaml" command="load"/> 
-
-    <rosparam file="$(find weeding_bot)/config/move_base_params.yaml" command="load" />
-    <rosparam file="$(find weeding_bot)/config/dwa_local_planner_params_thorvald.yaml" command="load" />-->
-
-<!--
-    <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
-    <remap from="odom" to="$(arg odom_topic)"/>
-    <remap from="map" to="$(arg map_frame)" />
-    <param name="DWAPlannerROS/min_vel_x" value="0.0" if="$(arg move_forward_only)" />
-  </node>-->
 
 </launch>
-
-
-
-
-
-<!--
-    <rosparam file="$(find turtlebot3_navigation)/param/costmap_common_params_$(arg model).yaml" command="load" ns="global_costmap" />
-    <rosparam file="$(find turtlebot3_navigation)/param/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" />
-        <rosparam file="$(find turtlebot3_navigation)/param/local_costmap_params.yaml" command="load" />
-    <rosparam file="$(find turtlebot3_navigation)/param/global_costmap_params.yaml" command="load" />
-
-    <rosparam file="$(find turtlebot3_navigation)/param/move_base_params.yaml" command="load" />
-    <rosparam file="$(find turtlebot3_navigation)/param/dwa_local_planner_params_$(arg model).yaml" command="load" />
-   -->
