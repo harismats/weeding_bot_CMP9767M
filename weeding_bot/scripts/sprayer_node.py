@@ -17,6 +17,7 @@ class Sprayer:
     #get the name prefix
     self.robot_name = robot_name
 
+    self.unsprayed = []
     self.sprayed = []  #save all sprayed weeds to exclude them for any further spraying
     
     #initialise subscribers and publishers
@@ -33,33 +34,57 @@ class Sprayer:
     #get pose of srayer in map frame first
     spr_trans, failed_tf_lookup = self.getSprayerPoseInMap(weed_pointcloud_msg.header.stamp)
 
+
     #if we got the sprayer pose as we should we continue
     if(failed_tf_lookup!=1):
-      print("ready to spray")
-      #for all detected weed places
+      #print("ready to spray")
+
+
+      #we first filter the newly detected weeds
+      #for all new detected weed places from the subscriber msg
       for weed in weed_pointcloud_msg.points:
+
+        #we always start by saving every new weed we have found in a list
+        #we will use these 
+        if weed not in self.unsprayed:
+          self.unsprayed.append(weed)
+
+
+
+      #for all unsprayed weeds spray the ones close to the sprayer's nozzle
+      for weed in self.unsprayed:
+
         #get difference in x and y axis etween sprayer and weed
         dx = abs(spr_trans[0] - weed.x)
         dy = spr_trans[1] - weed.y
 
+        # print('current weed-point: x={}, y={}, z={}'.format(weed.x, weed.y, weed.z))
+        # print('computed dy={}, dx={}'.format(dy, dx))
+
         #if the detected weed in inside the crop area (lane width-wise)
         if abs(dy) < 0.6:
           #if we are not far in terms of x axis - just so we don't miss
-          if dx < 0.05:
+          if dx < 0.1:
             #if we haven't sprayed at this weed yet
             if weed not in self.sprayed:
               #add it to the stack of sprayed weeds
               self.sprayed.append(weed)
+              #remove it from the unsprayed list
+              self.unsprayed.remove(weed)
+
+              #print('SPRAYING!!!')
 
               #call service to spray it
               req = nozzle_move_to_sprayRequest()
               req.y_axis_motion = dy
-              print('spraying at dy= {}'.format(dy))
+              print('weed-point we spray: x={}, y={}, z={}'.format(weed.x, weed.y, weed.z))
+              print('spraying at dy={}, dx={}'.format(dy, dx))
               self.nozzle_spray_srv(req)
 
 
 
   #callback to get pose of sprayer in map frame
+  #distance between sprayer and kinect2_link is 0.9m
   def getSprayerPoseInMap(self, msg_stamp):
     try:
       #we specify the time of the transform we want

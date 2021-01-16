@@ -27,14 +27,14 @@ BOX_SDF="""
       <collision name="collision">
         <geometry>
           <box>
-            <size>.1 .1 .01</size>
+            <size>.05 .05 .005</size>
           </box>
         </geometry>
       </collision>
       <visual name="visual">
         <geometry>
           <box>
-            <size>.1 .1 .01</size>
+            <size>.05 .05 .005</size>
           </box>
         </geometry>
         <material>

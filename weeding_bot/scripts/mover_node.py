@@ -82,7 +82,7 @@ class Mover:
   def sendNewGoal(self, x, y, yaw, crop_row_id):
     result = self.movebase_client(x, y, yaw)
     self.check_move_result(x, y, yaw, result)
-    self.publish_crop_row(0)
+    self.publish_crop_row(crop_row_id)
 
 
 

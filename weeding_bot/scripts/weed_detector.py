@@ -11,6 +11,7 @@ from cv_bridge import CvBridge
 import image_geometry
 
 from geometry_msgs.msg import Point32
+from std_msgs.msg import Int16
 
 #from pylab import *
 
@@ -33,6 +34,8 @@ class WeedDetector:
 
     #initialise subscribers and publishers
     self.image_sub = rospy.Subscriber("{}/kinect2_camera/hd/image_color_rect".format(self.robot_name), Image, self.image_callback)
+    self.crop_row_id = 0 #initialise crop row we are currently at
+    self.crop_row_sub = rospy.Subscriber("/crop_row", Int16, self.cropRowCallback)
 
     self.weed_pointcloud_msg = PointCloud() #message to publish for weed detections
     self.weed_cloud_pub = rospy.Publisher("{}/weed_points".format(self.robot_name), PointCloud, queue_size=10)
@@ -79,61 +82,35 @@ class WeedDetector:
     self.publishWeedPointCloud(rect_centers)
 
 
+  #get current crop number we are at
+  def cropRowCallback(self, data):
+    self.crop_row_id = data.data
+
+
+
   #return appripriate upper and lower bound for weed based on the lane in the crops that we are at
   def weed_filterer(self):
 
-    '''
-    if self.current_filter_var == "WPline1_0":
+    #weeds for lettuce1 and lettuce2 can be detected with the same filter bounds
+    if self.crop_row_id == 0 or self.crop_row_id == 1 or self.crop_row_id == 2 or self.crop_row_id == 3:
       lower_bound = np.array([30, 30, 0])
       upper_bound = np.array([100, 90, 85])
-      # upper_bound = np.array([100, 90, 40])
-      return lower_bound, upper_bound
-
-    elif self.current_filter_var == "WPline3_0":
-      lower_bound = np.array([30, 30, 0])
-      upper_bound = np.array([100, 90, 85])
-      return lower_bound, upper_bound
-
-    elif self.current_filter_var == "WPline5_0":
+    #weeds for onion rows
+    elif self.crop_row_id == 4 or self.crop_row_id == 5:
       lower_bound = np.array([40, 90, 0])
       upper_bound = np.array([100, 100, 200])
-      return lower_bound, upper_bound
-
-    elif self.current_filter_var == "weed":
-      lower_bound = np.array([30, 0, 10])
-      upper_bound = np.array([90, 255, 150])
-      return lower_bound, upper_bound
-
-    #then return ground bounds
     else:
-      '''
+      lower_bound = np.array([30, 30, 0])
+      upper_bound = np.array([100, 90, 85])      
 
-    # lower_bound = np.array([0, 30, 30])
-    # upper_bound = np.array([20, 140, 80])
-
-    #lettuce1 weed case - easy in general
-    # lower_bound = np.array([30, 30, 0])
-    # upper_bound = np.array([100, 90, 40])
 
     #lettuce1
     # lower_bound = np.array([30, 120, 0])
     # upper_bound = np.array([50, 180, 200])
 
-    #detects all weeds but a lot of rubbish too
-    # lower_bound = np.array([0, 0, 0])
-    # upper_bound = np.array([255, 80, 255])
-
-    #best for lettuce1 weed case - not an amazing job though
-    # lower_bound = np.array([30, 30, 0])
-    # upper_bound = np.array([100, 90, 40])
-
-    #detects onions. works very well for lettuce2 weeds and good for lettuce1 weeds
+    #onions. works very well for lettuce2 weeds and good for lettuce1 weeds
     # lower_bound = np.array([40, 40, 0])
     # upper_bound = np.array([100, 80, 200])
-
-    #very slow. works decently for onion weed case.
-    # lower_bound = np.array([0, 90, 0])
-    # upper_bound = np.array([255, 100, 255])
 
     #ground
     # lower_bound = np.array([0, 30, 30])
@@ -142,14 +119,6 @@ class WeedDetector:
     #everything that is not ground. anything that is plant (both lettuces, onions and weeds)
     # lower_bound = np.array([30, 0, 10])
     # upper_bound = np.array([90, 255, 150])
-
-    #good results for lettuce1 and lettuce2 weeds
-    lower_bound = np.array([30, 30, 0])
-    upper_bound = np.array([100, 90, 85])
-
-    #decent results for onion weeds
-    # lower_bound = np.array([40, 90, 0])
-    # upper_bound = np.array([100, 100, 200])
 
 
     return lower_bound, upper_bound

@@ -23,24 +23,29 @@
   <!-- ####################################################### -->
 
 
-  <!-- launch the move_base package for our robot -->
-  <include file="$(find weeding_bot)/launch/our_move_base.launch">
-    <arg name="robot_name" value="$(arg robot_name)" />
-    <arg name="cmd_vel_topic" value="$(arg cmd_vel_topic)" />
-    <arg name="odom_topic" value="$(arg odom_topic)" />
-  </include> 
+  <include file="$(find uol_cmp9767m_base)/launch/thorvald-sim.launch">
+    <arg name="obstacles" value="false" />
+    <arg name="second_robot" value="false" />
+    <arg name="fake_localisation" value="false" />
+    <arg name="map_server" value="true" />
+  </include>
+
 
   <!-- <include file="$(find uol_cmp9767m_tutorial)/launch/move_base.launch"/> -->
 
-
+<!--
   <arg name="map_file" default="$(find weeding_bot)maps/cropped.yaml"/>
 
-  <!-- map server -->
-  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)"/>
+   map server 
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)"/>-->
 
-  <!-- -->
-  <include file="$(find weeding_bot)/launch/amcl.launch"/>
+  <!-- Running AMCL -->
+  <include file="$(find uol_cmp9767m_tutorial)/launch/amcl.launch" >
+  </include>
   
+  <!-- Running move_base node -->
+  <include file="$(find uol_cmp9767m_tutorial)/launch/move_base_test.launch" >
+  </include>
 
 
 
