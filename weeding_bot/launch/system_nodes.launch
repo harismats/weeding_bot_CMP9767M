@@ -8,8 +8,8 @@
 
   <!-- ####################################################### -->
 
-  <!-- initialise amcl pose 
-  <node pkg="weeding_bot" name="amcl_initpose" type="amcl_initpose.py" output="screen" /> -->
+  <!-- initialise amcl pose -->
+  <node pkg="weeding_bot" name="amcl_initpose" type="amcl_initpose.py" output="screen" /> 
 
   <!-- sprayer service server -->
   <node pkg="weeding_bot" name="nozzle_move_to_spray_server" type="nozzle_move_to_spray_server.py" output="screen" /> 
@@ -22,9 +22,9 @@
   <node pkg="weeding_bot" name="weed_detector_node" type="weed_detector.py" output="screen" args="$(arg robot_name)" >
   </node>
 
-  <!-- weed detection node 
+  <!-- makes robot move to goals node -->
   <node pkg="weeding_bot" name="mover_node" type="mover_node.py" output="screen" args="$(arg robot_name)" >
-  </node>-->
+  </node> 
 
 
 </launch>

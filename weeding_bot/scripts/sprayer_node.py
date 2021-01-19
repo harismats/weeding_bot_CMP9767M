@@ -4,6 +4,7 @@ import rospy
 import sys
 import tf
 import math
+from collections import deque
 
 from sensor_msgs.msg import PointCloud
 
@@ -17,7 +18,8 @@ class Sprayer:
     #get the name prefix
     self.robot_name = robot_name
 
-    self.unsprayed = []
+    self.unsprayed_queue = deque(maxlen=500)
+    #self.unsprayed = []
     self.sprayed = []  #save all sprayed weeds to exclude them for any further spraying
     
     #initialise subscribers and publishers
@@ -46,13 +48,16 @@ class Sprayer:
 
         #we always start by saving every new weed we have found in a list
         #we will use these 
-        if weed not in self.unsprayed:
-          self.unsprayed.append(weed)
+        if weed not in self.unsprayed_queue:
+          self.unsprayed_queue.append(weed)
+          #self.unsprayed.append(weed)
 
+
+      print('Num of unsprayed: {}'.format(len(self.unsprayed_queue)))
 
 
       #for all unsprayed weeds spray the ones close to the sprayer's nozzle
-      for weed in self.unsprayed:
+      for weed in list(self.unsprayed_queue):
 
         #get difference in x and y axis etween sprayer and weed
         dx = abs(spr_trans[0] - weed.x)
@@ -62,23 +67,25 @@ class Sprayer:
         # print('computed dy={}, dx={}'.format(dy, dx))
 
         #if the detected weed in inside the crop area (lane width-wise)
-        if abs(dy) < 0.6:
+        if abs(dy) < 0.5:
           #if we are not far in terms of x axis - just so we don't miss
           if dx < 0.1:
             #if we haven't sprayed at this weed yet
             if weed not in self.sprayed:
               #add it to the stack of sprayed weeds
               self.sprayed.append(weed)
+
               #remove it from the unsprayed list
-              self.unsprayed.remove(weed)
+              self.unsprayed_queue.remove(weed)#remove 
+              #self.unsprayed.remove(weed)
 
               #print('SPRAYING!!!')
 
               #call service to spray it
               req = nozzle_move_to_sprayRequest()
               req.y_axis_motion = dy
-              print('weed-point we spray: x={}, y={}, z={}'.format(weed.x, weed.y, weed.z))
-              print('spraying at dy={}, dx={}'.format(dy, dx))
+              #print('weed-point we spray: x={}, y={}, z={}'.format(weed.x, weed.y, weed.z))
+              #print('spraying at dy={}, dx={}'.format(dy, dx))
               self.nozzle_spray_srv(req)
 
 

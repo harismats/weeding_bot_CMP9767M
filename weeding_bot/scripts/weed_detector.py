@@ -129,6 +129,7 @@ class WeedDetector:
   def find_contours(self, res, image):
 
     #convert image to grayscale and find contours in it
+    #Tutorial used: https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_contours/py_contours_begin/py_contours_begin.html#contours-getting-started
     imgray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
     ret, thresh = cv2.threshold(imgray, 21, 255, 0)
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -162,33 +163,32 @@ class WeedDetector:
     rect_centers = []
 
     #from filtered contours detect rectangulars
+    #Tutorial used: https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_contours/py_contour_properties/py_contour_properties.html#contour-properties
     for contour in contours_filtered:
       x, y, w, h = cv2.boundingRect(contour)
       cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
       detected_rectangs.append([x, y, w, h])
-      center_x = x + w/2
-      center_y = y + h/2
-      center_point = (center_x, center_y)
-      rect_centers.append(center_point)
+      detected_rectangs.append([x, y, w, h])#neds to be done twice
+
 
     # print('Num of detected rectangles: {}'.format(len(detected_rectangs)))
 
     # #combine rectangles with similar sizes and similar locations
-    # rectList = cv2.groupRectangles(detected_rectangs, groupThreshold=1, eps=0.1)
+    rectList = cv2.groupRectangles(detected_rectangs, groupThreshold=1, eps=0.8)
 
     # print(rectList[0])
-    # print(rectList[1])    
+    # print(rectList[1])
+    # print('Num of rects: {}'.format(len(rectList[0])))
 
-    # print('Num of rects: {}'.format(len(rectList)))
-
-    # #compute and draw circles
-    # rect_centers = []
-    # for rectangle in rectList:
-    #   center_x = x + w/2
-    #   center_y = y + h/2
-    #   center_point = (center_x, center_y)
-    #   rect_centers.append(center_point)
-    #   cv2.circle(image, center_point, 10, (255, 0, 0), 2)
+    #compute and draw grouped rectangles
+    for rectangle in rectList[0]:
+      x, y, w, h = rectangle
+      center_x = x + w/2
+      center_y = y + h/2
+      center_point = (center_x, center_y)
+      rect_centers.append(center_point)
+      #cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 3)
+      cv2.circle(image, center_point, 12, (0, 0, 255), 3)
 
 
     #if groupRectangles, i should return rectList instead of detected_rectangs
@@ -206,6 +206,7 @@ class WeedDetector:
     #rectify and project points in pointcloud based on camera model
     for w_center in rect_centers:
       #rectify and project in pixel coordinates
+      #Tutorial used: http://docs.ros.org/en/kinetic/api/image_geometry/html/python/index.html
       rectified_point = self.camera_model.rectifyPoint(w_center)
       projected_point = self.camera_model.projectPixelTo3dRay(rectified_point)
 
@@ -223,13 +224,6 @@ class WeedDetector:
 
   #show image data
   def show_img(self, cv_image):
-
-    # gray_img = cvtColor(cv_image, COLOR_BGR2GRAY)
-    # print np.mean(gray_img)
-    # img2 = blur(gray_img, (3, 3))
-    # imshow("blur", img2)
-    # img3 = Canny(gray_img, 10, 200)
-    # imshow("canny", img3)
 
     resized_img = cv2.resize(cv_image, (640, 480)) 
     cv2.imshow("Image window", resized_img)

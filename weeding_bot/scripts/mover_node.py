@@ -29,6 +29,7 @@ class Mover:
   #client that sends our goals to move base
   def movebase_client(self, wanted_x, wanted_y, wanted_yaw):
 
+    #Tutorial used: https://hotblackrobotics.github.io/en/blog/2018/01/29/action-client-py/
     client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
     client.wait_for_server()
 
@@ -104,12 +105,12 @@ def main(args):
   ##-------------------------------------------##
 
   #row 1 back and forth
-  mover_object.sendNewGoal(5.25, -3, 180, 0)
+  mover_object.sendNewGoal(5, -3, 180, 0)
   mover_object.sendNewGoal(-4.35, -3, 180, 0)
 
   #row 2 back and forth
-  mover_object.sendNewGoal(-5.25, -1.95, 0, 1)
-  mover_object.sendNewGoal(4.35, -1.95, 0, 1)
+  mover_object.sendNewGoal(-5.2, -1.95, 0, 1)
+  mover_object.sendNewGoal(4.3, -1.95, 0, 1)
 
   #row 3 back and forth
   mover_object.sendNewGoal(5.25, 0.023, 180, 2)
