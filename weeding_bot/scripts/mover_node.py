@@ -108,7 +108,7 @@ def main(args):
   mover_object.sendNewGoal(5, 0, -90, 0)
 
   #row 1 back and forth
-  mover_object.sendNewGoal(5, -3, 180, 0)
+  mover_object.sendNewGoal(4.4, -3, 180, 0)
   mover_object.sendNewGoal(-4, -3, 90, 0)
 
   #row 2 back and forth
