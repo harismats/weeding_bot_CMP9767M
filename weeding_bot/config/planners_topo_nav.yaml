@@ -3,8 +3,8 @@ base_global_planner: navfn/NavfnROS #default
 
 
 #base_local_planner: base_local_planner/TrajectoryPlannerROS #default
-#base_local_planner: dwa_local_planner/DWAPlannerROS
-base_local_planner: teb_local_planner/TebLocalPlannerROS
+base_local_planner: dwa_local_planner/DWAPlannerROS
+#base_local_planner: teb_local_planner/TebLocalPlannerROS
 
 
 # controller_frequency: 10.0 # (double, default: 20.0) The rate in Hz at which to run the control loop and send velocity commands to the base.
@@ -55,13 +55,12 @@ TrajectoryPlannerROS:
 #--------------------------------------------------------------------#
 #--------------------------------------------------------------------#
 
-
 DWAPlannerROS:
   holonomic_robot: false
 
   # Robot Configuration Parameters
   max_vel_x: 0.2
-  min_vel_x: -0.2
+  min_vel_x: 0.0
 
   max_vel_y: 0.0
   min_vel_y: 0.0
@@ -71,11 +70,11 @@ DWAPlannerROS:
   min_vel_trans:  0.11
 
   max_vel_theta: 1.82
-  min_vel_theta: 0.9
+  min_vel_theta: 0.5
 
   acc_lim_x: 2.5
   acc_lim_y: 0.0
-  acc_lim_theta: 3.2 
+  acc_lim_theta: 2.5 
 
   # Goal Tolerance Parametes
   xy_goal_tolerance: 0.05

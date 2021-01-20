@@ -104,29 +104,32 @@ def main(args):
   ##---------   Start sending goals  ----------##
   ##-------------------------------------------##
 
+  #initial rotation for localisation safety
+  mover_object.sendNewGoal(5, 0, -90, 0)
+
   #row 1 back and forth
   mover_object.sendNewGoal(5, -3, 180, 0)
-  mover_object.sendNewGoal(-4.35, -3, 180, 0)
+  mover_object.sendNewGoal(-4, -3, 90, 0)
 
   #row 2 back and forth
-  mover_object.sendNewGoal(-5.2, -1.95, 0, 1)
-  mover_object.sendNewGoal(4.3, -1.95, 0, 1)
+  mover_object.sendNewGoal(-4, -1.95, 0, 1)
+  mover_object.sendNewGoal(4.4, -1.95, 90, 1)
 
   #row 3 back and forth
-  mover_object.sendNewGoal(5.25, 0.023, 180, 2)
-  mover_object.sendNewGoal(4.35, 0.023, 180, 2)
+  mover_object.sendNewGoal(4.4, 0, 180, 2)
+  mover_object.sendNewGoal(-3.2, 0, 90, 2)
 
   #row 4 back and forth
-  mover_object.sendNewGoal(-5.25, 1.04, 0, 3)
-  mover_object.sendNewGoal(4.35, 1.04, 0, 3)
+  mover_object.sendNewGoal(-2.9, 0.98, 0, 3)
+  mover_object.sendNewGoal(4.4, 0.98, 90, 3)
 
   #row 5 back and forth
-  mover_object.sendNewGoal(-5.25, 2.952, 180, 4)
-  mover_object.sendNewGoal(4.35, 2.952, 180, 4)
+  mover_object.sendNewGoal(4.4, 2.952, 180, 4)
+  mover_object.sendNewGoal(-3.2, 2.952, 90, 4)
 
   #row 6 back and forth
-  mover_object.sendNewGoal(-5.25, 3.948, 0, 5)
-  mover_object.sendNewGoal(4.35, 3.948, 0, 5)
+  mover_object.sendNewGoal(-3.2, 3.948, 0, 5)
+  mover_object.sendNewGoal(4.4, 3.948, 90, 5)
 
 
 
